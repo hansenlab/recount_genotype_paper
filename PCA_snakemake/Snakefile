@@ -1,0 +1,105 @@
+
+chrs = [str(x) for x in range(1,23)]
+
+#If the data is not already downloaded. First run download.sh to retrieve all the WG vcf files from http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ for phase III 1000 Genome study
+OUTPUT_FOLDER = "/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII"
+
+
+rule all:
+    input:
+        #VCF_GZ=expand("http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{chr}.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes.vcf.gz",chr=chrs)
+        #VCF_in = expand(OUTPUT_FOLDER + "/download/1k_phase3_chr{chr}.vcf",chr=chrs),
+        #VCF_out = expand(OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf",chr=chrs),
+        #comp = expand(OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf.gz",chr=chrs),
+        #pca_ready= expand(OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_geno_proteinCoding.vcf",chr=chrs),
+        geno_out= expand(OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_geno_proteinCoding.vcf",chr=chrs)
+
+rule download_vcf:
+    input:
+        VCF_GZ= OUTPUT_FOLDER + "/download/ALL.chr{chr}.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes.vcf.gz"
+    params:
+        direc = OUTPUT_FOLDER + "/download/"
+    shell:
+        """
+        cd {params.direc} 
+        gunzip {input.VCF_GZ}
+        """
+rule add_chr:
+    input:
+        OUTPUT_FOLDER + "/download/ALL.chr{chr}.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes.vcf"
+    output:
+        VCF_in = OUTPUT_FOLDER + "/download/1k_phase3_chr{chr}.vcf"
+    shell:
+        """
+        sh add_chr.sh {input} {output.VCF_in}
+        """
+rule liftover:
+    input:
+        VCF_in = OUTPUT_FOLDER + "/download/1k_phase3_chr{chr}.vcf",
+        Picard = "/dcs04/hansen/data/recount_genotype/geuvadis/picard.jar",
+        Chain = "/dcs04/hansen/data/recount_genotype/geuvadis/hg19ToHg38.over.chain.gz",
+        Hg38 = "/dcl01/hansen/data/arazi/gtex_count/genotype/hg38.fa.gz"
+    output:
+        VCF_out = OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf",
+        Reject = temp(OUTPUT_FOLDER + "/liftover/{chr}_trash.vcf")
+    shell:
+        """
+        java -jar {input.Picard} LiftoverVcf --CHAIN {input.Chain} --INPUT {input.VCF_in} --OUTPUT {output.VCF_out} --REFERENCE_SEQUENCE {input.Hg38} --REJECT {output.Reject}
+        """
+rule compress:
+    input: 
+        VCF_out = OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf"
+    output:
+        comp = OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf.gz"
+    shell:
+        """
+        module load htslib
+        module load bcftools/1.11
+        bgzip -c {input.VCF_out}
+        bcftools index {output.comp}
+        """
+
+rule concat:
+    input:
+        comp = expand(OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf.gz", chr=chrs)
+    output:
+        concat=OUTPUT_FOLDER + "/concat/1k_phase3.hg38.vcf.gz",
+        soreted= OUTPUT_FOLDER + "/liftover/1k_phase3.hg38_sorted.vcf",
+        temp= OUTPUT_FOLDER + "/temp"
+    shell:
+        """
+        module load bcftools
+        bcftools concat -a -D {input.comp} --output {output.concat} --output-type z
+        bcftools index {output.concat}
+        bcftools sort {output.concat} -o {output.soreted} -O z --temp-dir {output.temp}
+        bcftools index {output.soreted}
+        """
+rule subset_regions:
+    input:
+        soreted= OUTPUT_FOLDER + "/liftover/1k_phase3.hg38_sorted.vcf",
+        biallelic= "/users/arazi/extdata/genotype/biallelic_SNP_gr.txt"
+    output:
+        pca_ready= OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_proteinCoding.vcf.gz"
+    shell:
+        """
+        module load bcftools
+        bcftools view -R {input.biallelic} {input.soreted} -o {output.pca_ready} -O z
+        bcftools index {output.pca_ready} 
+        """
+
+rule genoToNumber:
+    input:
+        OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_proteinCoding.vcf.gz"
+    output:
+        geno_out= OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_geno_proteinCoding.vcf"
+    shell:
+        """
+        zcat {input} | sed '/^##/! s/0|0/1/g' | sed '/^##/! s/0|1/2/g' | sed '/^##/! s/1|0/2/g' | sed '/^##/! s/1|1/3/g' > {output.geno_out}
+        """
+
+
+
+
+
+
+
