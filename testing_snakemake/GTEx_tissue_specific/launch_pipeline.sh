@@ -1,0 +1,1 @@
+snakemake --configfile GTEx_config.yaml --cluster-sync "qsub -l mem_free={resources.memory} -l h_vmem={resources.memory} -l h_fsize=800G -e /dcs04/hansen/data/recount_genotype/pipeline/logs -o /dcs04/hansen/data/recount_genotype/pipeline/logs" --jobs 1000 --latency-wait 10 -k
