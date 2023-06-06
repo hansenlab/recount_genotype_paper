@@ -14,6 +14,12 @@ We evaluated our genotyping model and accuracy model for the following datasets:
 
 - Geuvadis out-of-study test set, reporting accuracy metrics for the entire study: `testing_snakemake/geuvadis`
 
+### Model implementation
+
+- We applied our genotyping and accuracy model for all of SRA studies, which has no gold-standard genotypes to compute our model accuracy: `SRA_snakemake/`.
+
+- We also applied our model for TCGA normal samples: `TCGA_snakemake/`.
+
 ### Manuscript figures
 
 To generate our manuscript figures, see: `manuscript_figures/scripts`. 
