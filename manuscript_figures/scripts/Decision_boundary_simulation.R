@@ -10,7 +10,7 @@ if(!file.exists(plot_file)) {
 				  c(.94, .04, .02),
 				  c(.02, .04, .94))
 
-	model_MS = readRDS("/dcs04/hansen/data/recount_genotype/training/GTEx_Blended_Tissue_Training/model_MS_GTEx_Blended_Tissue_Training.rds")
+	model_MS = readRDS("/dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Training/train_genotyping_model/GTEx_Blended_Tissue_Training_genotyping_model.rds")
 
 
 	lattice_all = data.frame()

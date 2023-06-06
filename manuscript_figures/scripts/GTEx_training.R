@@ -6,9 +6,9 @@ theme_set(theme_cowplot())
 
 if(!file.exists("../ready_to_plot/GTEx_training.rds")) {
 	#Load in trained model
-	prior = readRDS("/dcs04/hansen/data/recount_genotype/training/GTEx_Blended_Tissue_Training/p_Zg_GTEx_Blended_Tissue_Training.rds")
-	model = readRDS("/dcs04/hansen/data/recount_genotype/training/GTEx_Blended_Tissue_Training/model_MS_GTEx_Blended_Tissue_Training.rds")
-	lattice = readRDS("/dcs04/hansen/data/recount_genotype/training/GTEx_Blended_Tissue_Training/model_MS_GTEx_Blended_Tissue_Training_lattice.rds")
+	prior = readRDS("/dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Training/train_genotyping_model/GTEx_Blended_Tissue_Training_genotyping_prior.rds")
+	model = readRDS("/dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Training/train_genotyping_model/GTEx_Blended_Tissue_Training_genotyping_model.rds")
+	lattice = readRDS("/dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Training/train_genotyping_model/GTEx_Blended_Tissue_Training_genotyping_lattice.rds")
 	metadata = read.csv("../../training_snakemake/GTEx_Blended_Tissue_Training_metadata.csv")
 	#Load in ref, alt, genotype information
 	ref_matrix <- readRDS("/dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Training/get_alt_ref_matrix/GTEx_Blended_Tissue_Training_ref.rds")
