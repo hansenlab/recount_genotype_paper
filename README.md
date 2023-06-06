@@ -1,4 +1,6 @@
-# recount_genotype_paper
+# Genotype calling from expression data in Recount3
+
+Afrooz Razi, Christopher C. Lo, Siruo Wang, Jeffrey T. Leek, Kasper D. Hansen 
 
 ### Model training 
 
