@@ -27,9 +27,11 @@ get_low_major_AF_quantile <- function(accuracyModelLattice) {
   major_AF_info <- unique(accuracyModelLattice$majorAF_bin)
   major_AF_info <- lapply(str_split(major_AF_info, ","), function(x) x[1]) #string manipulations to get it into a numeric vector
   major_AF_info <-  as.numeric(substr(major_AF_info, 2, 999))
-  low_major_AF_quantile <- c(major_AF_info, .95)
-  return(low_major_AF_quantile)
+  return(major_AF_info)
 }
+
+totalPtm <- proc.time()
+
 
 accuracyModelLattice <- readRDS(opt$accuracyModelLattice)
 
@@ -47,13 +49,18 @@ eval_low_majorAF <- eval_low_majorAF %>% select(c(names(eval_data), "predicted_a
 
 #prediction for high major AF
 eval_high_majorAF <- eval_data %>% filter(major_AF >= .95)
+eval_high_majorAF$majorAF_bin <- "[0.95, 1]"
 eval_high_majorAF <- left_join(eval_high_majorAF, accuracyModelLattice, by = c("coverage", "majorAF_bin"))
 eval_high_majorAF <- eval_high_majorAF %>% select(c(names(eval_data), "predicted_accuracy"))
 
 #put the two together
 eval_data <- rbind(eval_low_majorAF, eval_high_majorAF)
 eval_data$predicted_accuracy[is.na(eval_data$predicted_accuracy)] <- 1 #for coverage > 100 outside of lattice, give it perfect prediction
-eval_data <- eval_data %>% select(-majorAF_bin, -major_AF)
+eval_data <- eval_data %>% select(-major_AF)
 
 #save
 fwrite(eval_data, file = opt$output)
+
+cat("Total time elapsed:\n")
+print(proc.time() - totalPtm)
+print(gc())

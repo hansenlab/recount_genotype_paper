@@ -3,4 +3,3 @@ genotypedVCF: /dcl01/hansen/data/gtex_private/GTEx_Analysis_2017-06-05_v8_WholeG
 studyMetadata: GTEx_Blended_Tissue_Training_metadata.csv
 outputFolder: /dcs04/hansen/data/recount_genotype/pipeline
 tempFolder: /dcs04/hansen/data/recount_genotype/pipeline/tmp
-modelMetadata: model_metadata.csv

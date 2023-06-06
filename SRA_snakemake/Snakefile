@@ -34,12 +34,7 @@ def getOutOfLatticeSamplesByStudy(wildcards):
     #given an element of wildcards.study, return a list of samples that are out of the lattice.
     studySamples = studyMetadata.loc[studyMetadata["study"] == wildcards.study, "sample_id"].values
     return [outputFolder + f"/{wildcards.study}/genotype_single_sample/{s}_outOfLattice.csv" \
-            for s in studySamples] 
-def getGenotypedSamplesCompleteByStudy(wildcards):
-    #given an element of wildcards.study, return a list of samples that will be updated with out of lattice SNPs.
-    studySamples = studyMetadata.loc[studyMetadata["study"] == wildcards.study, "sample_id"].values
-    return [outputFolder + f"/{wildcards.study}/genotype_single_sample/{s}_predGenotypes_complete.csv" \
-            for s in studySamples]             
+            for s in studySamples]         
 def getSampleIDRepByStudy(wildcards):
     #given an element of wildcards.study, return a list of sample_id.
     studySamples = studyMetadata.loc[studyMetadata["study"] == wildcards.study, "sample_id"].values
@@ -84,7 +79,7 @@ rule genotype_outOfLattice_samples:
         outOfLatticeSamplesFile = tempFolder + "/{study}.outOfLatticeSamples.txt",
         allSampleIDRepFile = tempFolder + "/{study}.allSampleIDRep.txt",
         genotypedSamplesFile = tempFolder + "/{study}.allGenotypedSamples.txt",
-        genotypedSamplesComplete = getGenotypedSamplesCompleteByStudy,
+        genotypedSamplesComplete = getGenotypedSamplesByStudy, #important output file.
         genotypedSamplesCompleteFile = tempFolder + "/{study}.allGenotypedSamplesComplete.txt"
     shell:
         """
@@ -108,11 +103,11 @@ rule predict_genotype_accuracy:
         outOfLatticeGenotyped = outputFolder + "/{study_zip}/genotype_single_sample/{study_zip}_outOfLattice_genotyped.csv", #make sure genotype_outOfLattice_samples is run.
         accuracyModelLattice = config["accuracyModelLattice"]
     params:
-        genotypedSampleComplete = outputFolder + "/{study_zip}/genotype_single_sample/{sample_zip}_predGenotypes_complete.csv", 
+        genotypedSampleComplete = outputFolder + "/{study_zip}/genotype_single_sample/{sample_zip}_predGenotypes.csv", #this is our actual input. (in params b/c the output of prev. step is at study level)
     output:
         outputFolder + "/{study_zip}/predict_genotype_accuracy/{sample_zip}_predGenotypes_w_accuracy.csv"
     resources:
-        memory = "15G"
+        memory = "10G"
     shell:
         "Rscript ../R/predict_genotype_accuracy_singleSample.R --genotypedSampleComplete {params.genotypedSampleComplete} --output {output} --accuracyModelLattice {input.accuracyModelLattice}"
     

@@ -9,17 +9,6 @@ tempFolder = config["tempFolder"]
 studyMetadata = pd.read_csv(config["studyMetadata"])
 studies = studyMetadata["study"].unique().tolist()
 
-modelMetadata = pd.read_csv(config["modelMetadata"])
-models = modelMetadata["name"].tolist()
-
-#Short functions to return values from model metadata. 
-def getModel(wildcards):
-    return modelMetadata.loc[modelMetadata["name"] == wildcards.model, "model"].values[0]
-def getModelLattice(wildcards):
-    return modelMetadata.loc[modelMetadata["name"] == wildcards.model, "modelLattice"].values[0]
-def getModelPrior(wildcards):
-    return modelMetadata.loc[modelMetadata["name"] == wildcards.model, "prior"].values[0]
-
 #Final output
 finalOutput = outputFolder + "/AggregateFiles/" + os.path.basename(config["studyMetadata"])
 
@@ -133,7 +122,7 @@ rule predict_genotype:
     output:
         predictedGenotype = outputFolder + "/{study}/predict_genotype/{study}_predictedGenotype.rds"
     shell:
-        "Rscript ../R/predict_genotype.R --ref {input.ref} \
+        "Rscript ../R/genotype_multiSamples.R --ref {input.ref} \
         --alt {input.alt}  --model {input.model} \
         --modelLattice {input.modelLattice} \
         --pZg {input.pZg} \
