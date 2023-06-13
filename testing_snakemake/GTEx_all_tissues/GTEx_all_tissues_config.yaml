@@ -1,0 +1,8 @@
+#We treat all tissues as one tissue so that we can calculate overall testing accuracy, instead of separating it by tissues.
+SNPs: /dcl01/hansen/data/arazi/gtex_count/genotype/biallelic_SNP_gr.rda
+genotypedVCF: /dcl01/hansen/data/gtex_private/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.vcf.gz
+studyMetadata: GTEx_Blended_Tissue_Testing_metadata.all_tissues.csv
+modelMetadata: ../model_metadata.csv
+outputFolder: /dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Testing
+outputMetadata: /dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/GTEx_Blended_Tissue_Testing_metadata.all_tissues.csv
+tempFolder: /dcs04/hansen/data/recount_genotype/pipeline/tmp
