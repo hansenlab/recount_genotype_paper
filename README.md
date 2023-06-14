@@ -7,6 +7,12 @@ see https://github.com/raziafrooz/RecountGenotyper for R package.
 ### Overview:
 In this paper, we used raw reference and alternative read counts from Recount3 expression data to predict the genotype at biallelic SNPs. Using our machine learning model we were able to predict the genotype for all the recount3 samples and used that to generate a PCA plot containing the underlying population structure of the samples. 
 
+## Candidate list of biallelic SNPs from GTEx
+
+GTEx whole genome DNA-seq was used to select biallelic SNPs using "bcftools view -m2 -M2 -v snps".
+
+Only SNPs in the protein coding regions were kept using ensemble V85
+  
 ## Model training 
 
 We trained the model using samples in various tissues in GTEx
