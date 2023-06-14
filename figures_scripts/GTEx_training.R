@@ -96,14 +96,35 @@ levels(M_S_snp_samp_mu$genotype)<- c("AA", "AB", "BB")
 M_S_snp_samp = M_S_snp_samp[sample(1:nrow(M_S_snp_samp), .2 * nrow(M_S_snp_samp)) ,]
 
 #Figure S1
-pdf("../figures/GTEx_training_ref_alt.pdf", width = 7, height = 2.75)
-ggplot(M_S_snp_samp, aes(y = ref, x = alt)) + geom_point(alpha = .1) + facet_wrap(~genotype) + scale_x_continuous(limits = c(0, 500)) + scale_y_continuous(limits = c(0, 500))+ labs(y="Reference", x="Alternative")
-dev.off()
+library(scattermore)
+theme1= theme(axis.text=element_text(size = 25), axis.title=element_text(size = 25))
 
-pdf("../figures/GTEx_training_S_M.pdf", width = 7, height = 2.75)
-ggplot(M_S_snp_samp, aes(x = S, y = M)) + geom_point(alpha = .1) + facet_wrap(~genotype) + scale_x_continuous(limits = c(0, 8)) + scale_y_continuous(limits = c(-10, 10))
-dev.off()
+plot_data_column = function (geno) {
+ggplot(M_S_snp_samp, aes(y = ref, x = alt))+
+  geom_scattermore(data=M_S_snp_samp%>% filter(genotype== geno),pointsize = 4, alpha =0.4)+ 
+  scale_x_continuous(limits = c(0, 500)) + scale_y_continuous(limits = c(0, 500))+
+  labs(y="Reference", x="Alternative")+
+  theme(plot.margin = margin(0.5, 0.5, 1.5, 0.8))+theme1+
+  annotate(geom = "text", label=geno, x=300,y=500,size = 8)
+}
 
+myplots <- lapply(levels(M_S_snp_samp$genotype), plot_data_column)
+
+plot_data_column = function (geno) {
+  ggplot(M_S_snp_samp, aes(x = S, y = M))+
+    geom_scattermore(data=M_S_snp_samp%>% filter(genotype== geno),pointsize = 4, alpha =0.4)+ 
+    scale_x_continuous(limits = c(0, 8)) + scale_y_continuous(limits = c(-10, 10))+
+    theme(plot.margin = margin(0.5, 0.5, 1.5, 0.8))+theme1+
+    annotate(geom = "text", label=geno, x=300,y=500,size = 8)
+}
+
+myplots <- c(myplots,lapply(levels(M_S_snp_samp$genotype), plot_data_column))
+for(i in c(1,3,4,6)){myplots[[i]]<- myplots[[i]]+theme(axis.title.x=element_blank())}
+for(i in c(2,3,5,6)){myplots[[i]]<- myplots[[i]]+theme(axis.title.y=element_blank())}
+
+
+mp <- plot_grid(plotlist = myplots,nrow = 2, ncol = 3, label_size = 30, align = "vh", axis = "lr", labels = c('A', '','','B'))
+save_plot(filename = "/Users/afroozrazi/Desktop/plots/Ref_Alt_M_S.pdf",mp , nrow = 2, ncol = 3,base_height = 5, base_width =6) 
 
 #Figure 2
 
