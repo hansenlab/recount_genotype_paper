@@ -1,4 +1,4 @@
-SNPs: /dcl01/hansen/data/arazi/gtex_count/genotype/biallelic_SNP_gr.rda
+SNPs: /dcs04/hansen/data/recount_genotype/biallelic_snps/biallelic_SNP_gr.rds
 coverageCutoff: 4
 studyMetadata: /dcs04/hansen/data/recount_genotype/pipeline/metadata/all_SRA.csv
 outputMetadata: /dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/all_SRA.csv
