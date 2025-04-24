@@ -1,0 +1,5 @@
+SNPs: $Path_to_biallelic_SNP_gr.rds
+genotypedVCF: $Path_to_GTex_WGS.vcf.gz
+studyMetadata: $Path_to_GTEx_Blended_Tissue_Training_metadata.csv
+outputFolder: $Path_to_output_dir
+tempFolder: $Path_to_temp_dir

@@ -1,0 +1,1 @@
+snakemake --cluster "sbatch --mem {resources.mem_mb} --error error_%j.txt --output out_%j.txt -p shared --time=2-24:00:00" --configfile redo_SRA_config.yaml --jobs 200 --keep-going --latency-wait 60

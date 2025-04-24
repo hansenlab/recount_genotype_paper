@@ -9,7 +9,7 @@ Usage to generate Geuvadis metadata:
 import os, sys, warnings, argparse, pathlib
 import pandas as pd
 
-SEARCH_DIR = "/dcl02/lieber/ajaffe/recount-pump/human_tranche_backups" # where SRA data is stored.
+SEARCH_DIR = "$Path_to_SRA_dir" # where SRA data is stored.
 metadata = {}
 
 parser = argparse.ArgumentParser(description='Generate metadata from SRA project in recount3.')

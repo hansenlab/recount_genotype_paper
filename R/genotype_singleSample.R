@@ -13,6 +13,8 @@ option_list <- list(
     help = "Input numeric: Cutoff for coverage filtering."),
     make_option(c("--modelLattice"), type = "character",
     help = "Input: R object: Mean and variance model in lattice format."),
+	  make_option(c("--model"), type = "character",
+	  help = "Input: R object: Path to our genotyping model"),
     make_option(c("--prior"), type = "character",
     help = "Input: R object: Estimation of Pi prior for model."),
     make_option(c("--tempFolder"), type = "character",
@@ -30,6 +32,7 @@ if (length(opt$sample_id_rep) == 0 |
 	length(opt$total) == 0 |
 	length(opt$alt) == 0 |
     length(opt$modelLattice) == 0 | 
+    length(opt$model) == 0 |
     length(opt$prior) == 0 |
     length(opt$tempFolder) == 0 |
     length(opt$outOfLattice) == 0 |
@@ -42,8 +45,9 @@ library(data.table)
 library(dplyr)
 library(GenomicRanges)
 library(rtracklayer)
+library(caret)
 
-recount3_chr_mapping <- "/dcl02/lieber/ajaffe/recount-pump/recount3.alts.chromosome_mappings.tsv"
+recount3_chr_mapping <- "/dcs04/hansen/data/recount3/recount3.alts.chromosome_mappings.tsv"
 
 
 get_coverage_count <- function(snps_path, bigWig_path, coverage_cutoff) {
@@ -124,13 +128,31 @@ get_alt_count <- function(alt_path, sample_id_rep, filtered_snps_gr, temp_folder
 	#Construct final `alt_count` relative to `filtered_snps_gr`
 	final_alt_count <- rep(0, length(filtered_snps_gr))
 	final_alt_count[snps_key_idx] <- alt_count[alt_key_idx]$N
-	return(final_alt_count)
+
+	
+	#calculate the sequencing counts aligned to non alt/ref sequence
+	#this should be subtracted from the total later
+	not_alt_count<-alt_count[-alt_key_idx,]
+	not_alt_count<-not_alt_count %>% group_by(chr,pos) %>% summarize(error=sum(N))
+	error_gr<-makeGRangesFromDataFrame(not_alt_count,seqnames="chr",start.field ="pos",end.field = "pos", keep.extra.columns = T)
+	
+	ov <- findOverlaps(error_gr, filtered_snps_gr)
+	final_error_count <- rep(0, length(filtered_snps_gr))
+	final_error_count[subjectHits(ov)] <- error_gr$error[queryHits(ov)]
+	
+	return(list(final_alt_count = final_alt_count,
+	            final_error_count = final_error_count))
+	
+	
+	
+	
 }
 
 predict_genotype <- function(model_path, model_lattice_path, prior_path, M, S) {
 	lattice_max <- 8.5 
 	#Load in model information.
 	model_MS_lattice <- readRDS(model_lattice_path)
+	model_MS <- readRDS(model_path)
 	prior <- readRDS(prior_path)
 	if(all(is.na(prior)) == T) {
 	  prior = c(.94, .04, .02) 
@@ -142,24 +164,34 @@ predict_genotype <- function(model_path, model_lattice_path, prior_path, M, S) {
 	cat("Number of S values to infer with model later: ", length(outsideLattice_idx), "\n")
 	#Compute likelihood * prior for each genotype.
 	likelihood_times_prior <- sapply(1:3, function(k){
-	    #Inference on mu_M and sd_M
-	    mu_M <- rep(NA, length(withinLattice_idx))
-	    sd_M <- rep(NA, length(withinLattice_idx))
-	    if(k == 1) {
-	    	#model_MS_lattice is a data.table with key set to its S values, 
-	    	#so we use the key to get lattice values.
-			mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_1
-			sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_1
-	    }else if(k == 2) {
-	      	mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_2
-			sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_2
-	    }else if(k == 3) {
-	      	mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_3
-			sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_3
-	    }
-	    sd_M[sd_M <= 0] = 0 #if we predict (extrapolate) any variance to be <= 0, set it to 0. 
-	    return(prior[k] * dnorm(x = M[withinLattice_idx], mean = mu_M, sd = sd_M, log = FALSE))
-  	})
+	  #Inference on mu_M and sd_M
+	  mu_M <- rep(NA, length(withinLattice_idx))
+	  sd_M <- rep(NA, length(withinLattice_idx))
+	  if(k == 1) {
+	    #model_MS_lattice is a data.table with key set to its S values, 
+	    #so we use the key to get lattice values.
+	    mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_1
+	    sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_1
+	    indx<-which(is.na(mu_M))
+	    mu_M[indx] <- predict(model_MS[[1]][[1]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	    sd_M[indx] <- predict(model_MS[[1]][[2]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	  }else if(k == 2) {
+	    mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_2
+	    sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_2
+	    indx<-which(is.na(mu_M))
+	    mu_M[indx] <- predict(model_MS[[2]][[1]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	    sd_M[indx] <- predict(model_MS[[2]][[2]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	  }else if(k == 3) {
+	    mu_M <- model_MS_lattice[J(S[withinLattice_idx])]$mu_M_prediction_3
+	    sd_M <- model_MS_lattice[J(S[withinLattice_idx])]$sd_M_prediction_3
+	    indx<-which(is.na(mu_M))
+	    mu_M[indx] <- predict(model_MS[[3]][[1]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	    sd_M[indx] <- predict(model_MS[[3]][[2]], data.frame(mu_S = S[withinLattice_idx][indx]))
+	  }
+	  sd_M[sd_M <= 0] = 0 #if we predict (extrapolate) any variance to be <= 0, set it to 0. 
+	  return(prior[k] * dnorm(x = M[withinLattice_idx], mean = mu_M, sd = sd_M, log = FALSE))
+	})
+	
 
 
   	posterior <- sapply(1:3, function(k){
@@ -188,7 +220,7 @@ writeNullOutput = function(resultFile, latticeFile) {
 	#because it allows the pipeline to keep running, and it will be apparent when the user
 	#see that there's nothing that was genotyped.
 	cat("Error loading in bigwig or no data to genotype! Writing blank results.\n")
-	result <- data.table(chr = character(), start = numeric(), AF = numeric(), M = numeric(), S = numeric(), coverage = numeric(), pred_genotype = numeric())
+	result <- data.table(chr = character(), start = numeric(), AF = numeric(), M = numeric(), S = numeric(), coverage = numeric(),ref_count= numeric(), pred_genotype = numeric())
 	fwrite(result, file = resultFile)
 	fwrite(result, file = latticeFile)
 }
@@ -196,6 +228,7 @@ writeNullOutput = function(resultFile, latticeFile) {
 
 cat("Loading in SNPs and bigWig.\n")
 ptm <- proc.time()
+
 coverage_count_result <- get_coverage_count(snps_path = opt$SNPs, 
 											bigWig_path = opt$total, 
 											coverage_cutoff = as.numeric(opt$cutoff))
@@ -212,27 +245,40 @@ if(any(is.na(coverage_count_result)) | length(coverage_count_result$coverage_cou
 cat("Loading in alt counts.\n")
 ptm <- proc.time()
 
-alt_count <- get_alt_count(alt_path = opt$alt, 
+alt_count_df <- get_alt_count(alt_path = opt$alt, 
 						   sample_id_rep = opt$sample_id_rep, 
 						   filtered_snps_gr = coverage_count_result$filtered_snps_gr,
 						   temp_folder = paste0(opt$tempFolder, "/"))
+
 
 print(gc())
 print(proc.time() - ptm)
 cat("Finished loading in alt counts.\n")
 
-if(all(is.na(alt_count))) {
+if(all(is.na(alt_count_df))) {
 	writeNullOutput(opt$result, opt$outOfLattice)
 	q()
 }
+alt_count <- alt_count_df$final_alt_count
+total_cov <- coverage_count_result$coverage_count- alt_count_df$final_error_count
+filtered_snps_gr <- coverage_count_result$filtered_snps_gr
 
+#At some locations, the alt count is larger than the total count: in these SNPs replace the alt count with total count
+id<-which(alt_count>total_cov)
+alt_count[id]<-total_cov[id]
 #Compute M and S values. 
-ref_count <- coverage_count_result$coverage_count - alt_count
+ref_count <- total_cov - alt_count
 #We sometimes have cases where the alt counts > coverage counts (bigWig): 
 #the alt reads were processed to keep overlapping pair-end reads
 #whereas the coverage counts (bigWig) did not keep overlapping pair-end reads. 
 #this is an ad hoc way to deal with negative counts in `ref_count`.
-ref_count[ref_count < 0] <- 0 
+error_indx<-which(ref_count < 0 | alt_count < 0 | total_cov< opt$cutoff)
+if(length(error_indx)>0){
+  alt_count<- alt_count[-error_indx] 
+  total_cov<- total_cov[-error_indx] 
+  ref_count<- ref_count[-error_indx] 
+  filtered_snps_gr<- filtered_snps_gr[-error_indx]
+} 
 #To prevent divde by 0 in M, S calculation, we add psuedocount of 1. 
 M <- log2((ref_count + 1) / (alt_count + 1))
 S <- log2(sqrt((ref_count + 1) * (alt_count + 1)))
@@ -251,22 +297,24 @@ print(proc.time() - ptm)
 cat("Finished predicting genotype. Saving results now.\n")
 
 #Predicted genotype result.
-result <- data.table(chr = as.character(seqnames(coverage_count_result$filtered_snps_gr[pred_genotype_result$withinLattice_idx])),
-					start = start(coverage_count_result$filtered_snps_gr[pred_genotype_result$withinLattice_idx]),
-					AF = round(coverage_count_result$filtered_snps_gr$allele_freq[pred_genotype_result$withinLattice_idx], 4),
+result <- data.table(chr = as.character(seqnames(filtered_snps_gr[pred_genotype_result$withinLattice_idx])),
+					start = start(filtered_snps_gr[pred_genotype_result$withinLattice_idx]),
+					AF = round(filtered_snps_gr$allele_freq[pred_genotype_result$withinLattice_idx], 4),
 					M = M[pred_genotype_result$withinLattice_idx],
 					S = S[pred_genotype_result$withinLattice_idx],
 					coverage = ref_count[pred_genotype_result$withinLattice_idx] + alt_count[pred_genotype_result$withinLattice_idx],
+					ref_count= ref_count[pred_genotype_result$withinLattice_idx],
 					pred_genotype = pred_genotype_result$predicted_genotype)
 fwrite(result, file = opt$result)
 
 #M, S values that fall outside of our lattice, to be predicted with model file later.
-outOfLattice_result <- data.table(chr = as.character(seqnames(coverage_count_result$filtered_snps_gr[pred_genotype_result$outsideLattice_idx])),
-								start = start(coverage_count_result$filtered_snps_gr[pred_genotype_result$outsideLattice_idx]),
-								AF = round(coverage_count_result$filtered_snps_gr$allele_freq[pred_genotype_result$outsideLattice_idx], 4),
+outOfLattice_result <- data.table(chr = as.character(seqnames(filtered_snps_gr[pred_genotype_result$outsideLattice_idx])),
+								start = start(filtered_snps_gr[pred_genotype_result$outsideLattice_idx]),
+								AF = round(filtered_snps_gr$allele_freq[pred_genotype_result$outsideLattice_idx], 4),
 								M = M[pred_genotype_result$outsideLattice_idx],
 								S = S[pred_genotype_result$outsideLattice_idx],
 								coverage = ref_count[pred_genotype_result$outsideLattice_idx] + alt_count[pred_genotype_result$outsideLattice_idx],
+								ref_count= ref_count[pred_genotype_result$outsideLattice_idx],
 								pred_genotype = NA)
 fwrite(outOfLattice_result, opt$outOfLattice)
 

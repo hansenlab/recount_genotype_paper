@@ -1,5 +1,6 @@
 library(optparse)
 
+
 option_list <- list(
     make_option(c("--genotypedSamples"), type = "character",
     help = "Input: List of genotyped samples."),

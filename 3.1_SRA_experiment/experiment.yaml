@@ -1,0 +1,8 @@
+metaData: $Path_to_experiment_metadata
+outputMetadata: $Path_to_output_metdata
+outputFolder: $Path_to_output_dir
+tempFolder: $Path_to_tmp_dir
+model: $Path_to_model
+modelLattice: $Path_to_model_lattice.rds
+modelPrior: $Path_to_model_prior.rds
+accuracyModelLattice: $Path_to_accuracy_model_lattice.rds

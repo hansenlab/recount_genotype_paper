@@ -1,7 +1,7 @@
 library(VariantAnnotation)
 
 
-biallelic<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pos_GTEx.rds")
+biallelic<-readRDS("pos_GTEx.rds")
 st<-strsplit(biallelic, "_")
 df=data.frame(chr=rep(NA,length(st) ), start=rep(0,length(st) ))
 for(XX in 1:length(st)) {
@@ -11,7 +11,7 @@ df$start[XX]<-as.numeric(st[[XX]][2])}
 biallelic<-GRanges(seqnames= df$chr, IRanges(start=as.numeric(df$start), end=as.numeric(df$start)+1))
 
 #load in parts of the VCF from 1K genome that we are interested in:
-fl<-"/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_ready/1k_phase3.hg38_geno_proteinCoding.vcf.gz"
+fl<-"1k_phase3.hg38_geno_proteinCoding.vcf.gz"
 tab<-TabixFile(fl)
 svp<-ScanVcfParam(geno="GT", which=biallelic)
 vcf_rng<-readVcf(tab, "hg38", param= svp)
@@ -34,17 +34,14 @@ geno_num<-geno[-id,]
 location<-rownames(geno_num)
 pca<-prcomp(t(geno_num))
 
-pop<-read.csv("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/concat/integrated_call_samples_v3.20130502.ALL.panel", sep = "\t")
+pop<-read.csv("integrated_call_samples_v3.20130502.ALL.panel", sep = "\t")
 population<- as.factor(sapply(1:ncol(geno), function(XX) { pop$super_pop[which(pop$sample == colnames(geno)[XX])[1]] }))
 pca_plot$sub_pop<-as.factor(sapply(1:ncol(geno), function(XX) { pop$pop[which(pop$sample == colnames(geno)[XX])[1]] }))
 
 pca_plot<-data.frame(pc1=as.numeric(pca$x[,1]), pc2=as.numeric(pca$x[,2]), pop=population)
 
-###Save the data:
-#saveRDS(pca, file="/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA.rds")
-#saveRDS(pca_plot, file="/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pca_plot_1KGenome.rds")
-#saveRDS(location, file="/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA_location.rds")
-
+#---------------------------------------------------
+#Make plots
 varian<-as.numeric(summary(pca)$importance[2,1:10])
 
 pdf(file="~/plot/PCA1K.pdf", width = 12, height = 8)

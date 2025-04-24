@@ -1,0 +1,7 @@
+SNPs: $Path_to_biallelic_SNP_gr.rds
+genotypedVCF: $Path_to_geuvadis.hg38.vcf
+studyMetadata: $Path_to_geuvadis_metadata.csv
+modelMetadata: $Path_to_model_metadata.csv
+outputFolder: $Path_to_output_dir
+outputMetadata: $Path_to_output_metadata
+tempFolder: $Path_to_temp_dir

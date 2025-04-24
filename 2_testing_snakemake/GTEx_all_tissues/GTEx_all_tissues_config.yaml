@@ -1,0 +1,8 @@
+#We treat all tissues as one tissue so that we can calculate overall testing accuracy, instead of separating it by tissues.
+SNPs: $Path_to_biallelic_SNP_gr.rds
+genotypedVCF: $Path_to_GTExWGS.vcf.gz
+studyMetadata: $Path_to_studymetadata
+modelMetadata: $Path_to_model_metadata.csv
+outputFolder: $Path_to_output_dir
+outputMetadata: $Path_to_output_metadata_dir
+tempFolder: $Path_to_tmp_dir

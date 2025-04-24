@@ -1,7 +1,0 @@
-SNPs: /dcs04/hansen/data/recount_genotype/biallelic_snps/biallelic_SNP_gr.rds
-genotypedVCF: /dcs04/hansen/data/recount_genotype/geuvadis/concat/geuvadis.hg38.vcf
-studyMetadata: geuvadis_metadata.csv
-modelMetadata: ../model_metadata.csv
-outputFolder: /dcs04/hansen/data/recount_genotype/pipeline/ERP001942_Testing
-outputMetadata: /dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/Geuvadis_testing_metadata.csv
-tempFolder: /dcs04/hansen/data/recount_genotype/pipeline/tmp

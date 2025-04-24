@@ -1,7 +1,7 @@
 #Find the locations with the genotyoe information in all the GTEx tissues
 #We only looked at tissues with more than 80 samples bc tissues with small sample sizes might have had bad library prep
 
-metadata = read.csv("/dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/GTEx_Blended_Tissue_Testing_metadata.csv")
+metadata = read.csv("GTEx_Blended_Tissue_Testing_metadata.csv")
 length(metadata$study)
 for (i in 1:length(metadata$study)){
   cat(metadata$study[i], "\n")
@@ -28,7 +28,7 @@ for (i in 1:length(metadata$study)){
   n<-n+1
   }}}
 
-saveRDS(positions1, file="/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pos_GTEx.rds")
+saveRDS(positions1, file="pos_GTEx.rds")
 
 
 

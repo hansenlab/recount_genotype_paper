@@ -1,7 +1,0 @@
-SNPs: /dcs04/hansen/data/recount_genotype/biallelic_snps/biallelic_SNP_gr.rds
-genotypedVCF: /dcl01/hansen/data/gtex_private/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.vcf.gz
-studyMetadata: GTEx_Blended_Tissue_Testing_metadata.csv
-modelMetadata: ../model_metadata.csv
-outputFolder: /dcs04/hansen/data/recount_genotype/pipeline/GTEx_Blended_Tissue_Testing
-outputMetadata: /dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/GTEx_Blended_Tissue_Testing_metadata.csv
-tempFolder: /dcs04/hansen/data/recount_genotype/pipeline/tmp

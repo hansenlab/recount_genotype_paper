@@ -1,0 +1,1 @@
+snakemake --cluster-sync "qsub -sync yes -l mem_free={resources.memory} -l h_vmem={resources.memory} -l h_fsize=100G -e ~/logs -o ~/logs" --jobs 100 --latency-wait 60

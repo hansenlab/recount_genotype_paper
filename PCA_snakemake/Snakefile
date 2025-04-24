@@ -2,7 +2,7 @@
 chrs = [str(x) for x in range(1,23)]
 
 #If the data is not already downloaded. First run download.sh to retrieve all the WG vcf files from http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ for phase III 1000 Genome study
-OUTPUT_FOLDER = "/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII"
+OUTPUT_FOLDER = "1kGenome_pIII"
 
 
 rule all:
@@ -36,9 +36,9 @@ rule add_chr:
 rule liftover:
     input:
         VCF_in = OUTPUT_FOLDER + "/download/1k_phase3_chr{chr}.vcf",
-        Picard = "/dcs04/hansen/data/recount_genotype/geuvadis/picard.jar",
-        Chain = "/dcs04/hansen/data/recount_genotype/geuvadis/hg19ToHg38.over.chain.gz",
-        Hg38 = "/dcl01/hansen/data/arazi/gtex_count/genotype/hg38.fa.gz"
+        Picard = "picard.jar",
+        Chain = "hg19ToHg38.over.chain.gz",
+        Hg38 = "hg38.fa.gz"
     output:
         VCF_out = OUTPUT_FOLDER + "/liftover/1k_phase3_chr{chr}_hg38.vcf",
         Reject = temp(OUTPUT_FOLDER + "/liftover/{chr}_trash.vcf")
@@ -77,7 +77,7 @@ rule concat:
 rule subset_regions:
     input:
         soreted= OUTPUT_FOLDER + "/liftover/1k_phase3.hg38_sorted.vcf",
-        biallelic= "/dcs04/hansen/data/recount_genotype/biallelic_snps/biallelic_SNP_gr.txt"
+        biallelic= "biallelic_SNP_gr.txt"
     output:
         pca_ready= OUTPUT_FOLDER + "/pca_ready/1k_phase3.hg38_proteinCoding.vcf.gz"
     shell:

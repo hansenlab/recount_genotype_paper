@@ -1,0 +1,11 @@
+SNPs: $Path_to_biallelic_SNP_gr.rda
+coverageCutoff: 4
+studyMetadata: $Path_to_SRA_metadata
+outputMetadata: $Path_to_output_metadata
+outputFolder: $Path_to_output_dir
+tempFolder: $Path_to_tmp_dir
+model: $Path_to_model
+modelLattice: $Path_to_model_lattice
+modelPrior: $Path_to_prior
+accuracyModel: $Path_to_accModel
+accuracyModelLattice: $Path_to_accModelLattice

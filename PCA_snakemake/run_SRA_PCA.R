@@ -3,25 +3,27 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 library(data.table)
+library(vroom)
 theme_set(theme_cowplot())
 
 ####In this R session, I looked at SRA samples.
 ##I projected the SRA data onto 1000 Genome PCA that I have previously made in make_1kg_pca.R
 
-pca<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA.rds")
-pca_plot<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pca_plot_1KGenome.rds")
-pca_plot$zero_geno = pca_plot$sub_pop = NA
-location<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA_location.rds")
+pca<-readRDS("1000GenomePCA.rds")
+pca_plot<-readRDS("pca_plot_1KGenome.rds")
+pca_plot$zero_geno <- 0
+pca_plot$sub_pop <- "1KG"
+location<-readRDS("1000GenomePCA_location.rds")
 
 #Read in the metadata:
-metadata = read.csv("/dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/all_SRA.csv")
+metadata = read.csv("all_SRA.csv")
 positions2<-location
 
-for (i in 1:dim(metadata)[1]){
+for (i in 1:nrow(metadata)){
   print(i)
   cat(metadata$sample_id[i], "\n")
-  geno<-as_tibble(read.csv(metadata$genotypedSamples[i])) %>% unique() %>% select("chr","start","pred_genotype")
-  if(dim(geno)[1]>1){
+  geno<-as_tibble(vroom(metadata$genotypedSamples[i])) %>% select("chr","start","pred_genotype")
+  if(nrow(geno)>1){
     geno$chr <- paste0(geno$chr,"_" ,geno$start)
     geno$start<- NULL
     #Make sure that we have the same number of dimentions in SRA as the original 1KG data:
@@ -46,6 +48,9 @@ for (i in 1:dim(metadata)[1]){
     #Add to the plot
     pca_plot2<-data.frame(pc1=as.numeric(pca_projec[,1]), pc2=as.numeric(pca_projec[,2]), pop=as.factor(metadata$study[i]), sub_pop=as.factor(metadata$sample_id[i]), zero_geno=zero)
     pca_plot<-rbind(pca_plot,pca_plot2)
+  }else{
+  pca_plot2<-data.frame(pc1=NA, pc2=NA, pop=as.factor(metadata$study[i]), sub_pop=as.factor(metadata$sample_id[i]), zero_geno=NA)
+  pca_plot<-rbind(pca_plot,pca_plot2)
   }}
 
-saveRDS(pca_plot, file = "/dcs04/hansen/data/recount_genotype/PCA/SRA/pca_plot.rds")
+fwrite(pca_plot,"sra_pca.csv.gz")
