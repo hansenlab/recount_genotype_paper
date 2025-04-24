@@ -6,14 +6,12 @@ library(MetBrewer)
 cc_fill <-scale_fill_manual(values=met.brewer("Monet"))
 cc_color <-scale_color_manual(values=met.brewer("Monet"))
 source("~/recount_genotype/redo_manuscript_figures/scripts/source.R")
-setwd("~/recount_genotype/redo_manuscript_figures")
 
-gatk_metadata<-read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/gatk_geuvadis_gt.csv")
 
-#geu_met<-read.delim("recount_genotype/study_metadata/geuvadis/input/EMBL_geuvadis_metadata.txt")
-geu_met<-read.csv("/users/arazi/recount_genotype/GATK_snakemake/test.csv")
+gatk_metadata<-read.csv("gatk_geuvadis_gt.csv") #GATK metadata
+geu_met<-read.csv("test.csv") #Geuvadis metadata
 opt<-c()
-opt$allGenotypedSamplesAgg<-"/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/geuvadis/aggregated/agg_geuvadis_w_true_gt.csv.gz"
+opt$allGenotypedSamplesAgg<-"agg_geuvadis_w_true_gt.csv.gz"
 
 geu<-fread(opt$allGenotypedSamplesAgg)
 geu<-geu %>% 
@@ -22,8 +20,8 @@ geu<-geu %>%
     true_genotype == "0/1" | true_genotype == "1/0" | true_genotype == "1|0" | true_genotype == "0|1"~ 2,
     true_genotype == "1/1" | true_genotype == "1|1" ~ 3))
 
-plotFile<-"~/recount_genotype/redo_manuscript_figures/ready_to_plot/gatkVSrecount.csv"
-plotFile2<-"~/recount_genotype/redo_manuscript_figures/ready_to_plot/gatkVSrecount_stat.csv"
+plotFile<-"gatkVSrecount.csv"
+plotFile2<-"gatkVSrecount_stat.csv"
 
 if(!file.exists(c(plotFile,plotFile2))){
 gatkVSrecount<-c()

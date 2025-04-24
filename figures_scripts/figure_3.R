@@ -3,11 +3,9 @@ library(data.table)
 library(cowplot)
 library(MetBrewer)
 
-setwd("~/recount_genotype/redo_manuscript_figures")
+
 source("scripts/source.R")
 
-# cc_fill<- scale_fill_manual(values=c("grey60",met.brewer("Troy",8)[2],met.brewer("Troy",8)[7]))
-# cc_color <-scale_color_manual(values=c("grey60",met.brewer("Troy",8)[2],met.brewer("Troy",8)[7]))
 
 cc_fill<- scale_fill_manual(values=c(met.brewer("Cassatt2",8)[4],met.brewer("Cassatt2",9)[2],met.brewer("Cassatt2",9)[7]))
 cc_color <-scale_color_manual(values=c(met.brewer("Cassatt2",8)[4],met.brewer("Cassatt2",9)[2],met.brewer("Cassatt2",9)[7]))

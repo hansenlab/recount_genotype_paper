@@ -8,11 +8,11 @@ my_color_manual = c("#000",
                     "#D85E5E")
 
 #Calculate GTEX conditional accuracies:
-#GTEx_metadata = read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")
+
 conditional_accuracies<-c()
 figure<-"ready_to_plot/geuvadis_conditional_acc.rds"
 if(!file.exists(figure)){
-  predict_gt_final<-fread("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/geuvadis/aggregated/agg_geuvadis_w_true_gt.csv.gz")
+  predict_gt_final<-fread("agg_geuvadis_w_true_gt.csv.gz") ##file containing paths to geuvadis predicted and true genotypes
   
   predict_gt_final<-predict_gt_final %>% mutate(true_genotype=case_when(
     true_genotype == "0/0" | true_genotype == "0|0" ~ 1,

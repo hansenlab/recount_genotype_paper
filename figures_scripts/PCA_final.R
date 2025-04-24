@@ -5,12 +5,10 @@ library(dplyr)
 theme_set(theme_cowplot())
 theme1= theme(axis.text=element_text(size = 10), axis.title=element_text(size = 20))
 setwd("~/recount_genotype/redo_manuscript_figures")
-#my_color<-c("tomato","yellow3","springgreen3","steelblue1","orchid2","gray57")
-#FFA81A
-#D48300
+
 my_color<-c("#DD77E4","#962638","#FFA81A","#585CD4","#5ba965","gray57")
-sra_population<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/pca_plot_predPop.rds")
-p_no_pop<-fread("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/sra_pca.csv.gz")
+sra_population<-readRDS("pca_plot_predPop.rds") #path to predicted population for SRA
+p_no_pop<-fread("sra_pca.csv.gz") #path to PC loadings for SRA
 
 
 #------------------------------------------------------------------------------------------------------------
@@ -43,7 +41,7 @@ sra_population$missingness[sra_population$percent_zero>70]<-">70%"
  #PCA plot2 
  #------------------------------------------------------------------------------------------------------------
  
- pca_plot<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/1kGenome_pIII/pca_plot/1KG_1percentSimulation.rds")
+ pca_plot<-readRDS("1KG_1percentSimulation.rds")
  
  pca_plot$percent_zero<-(pca_plot$zero_geno/30875)*100
  pca_plot$missingness<-"0%"
@@ -84,7 +82,7 @@ sra_population$missingness[sra_population$percent_zero>70]<-">70%"
  #PCA plot3
  #------------------------------------------------------------------------------------------------------------
  
- p_prob<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/SRA_pop_acc.rds")
+ p_prob<-readRDS("SRA_pop_acc.rds")
  sra_population$acc<-NA
  sra_population$acc<-p_prob$max_prob[match(sra_population$sub_pop, p_prob$sample_id)]
  pp2<-sra_population %>% filter(acc>0.7, !is.na(assay)) %>% group_by(assay,pred_pop) %>% summarise(n=n())%>% ungroup() %>% group_by(assay) %>%  mutate(percent=round(n/sum(n)*100,3))
@@ -110,7 +108,7 @@ pdf(file="figure/PCA_stackBar.pdf", width = 6, height = 6.5)
  #------------------------------------------------------------------------------------------------------------
  #PCA plot4
  #------------------------------------------------------------------------------------------------------------
- p<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/pca_plot_predPop.rds")
+ p<-readRDS("pca_plot_predPop.rds")
  
  my_color<-c("#DD77E4","#962638","#FFA81A","#585CD4","#5ba965","gray57")
  plot_data_column = function (data, miss, type) {

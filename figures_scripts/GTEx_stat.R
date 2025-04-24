@@ -1,11 +1,11 @@
 library(tidyverse)
 library(data.table)
 
-setwd("~/recount_genotype/redo_manuscript_figures")
+
 
 plot_file = "ready_to_plot/GTEx_stat.rds"
 if(!file.exists(plot_file)) {
-  GTEx_metadata = read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")
+  GTEx_metadata = read.csv("GTEx_testing.csv") #Path to GTex testing metadata
   all_GTEx = list()
   for(i in 1:nrow(GTEx_metadata)) {
     print(i)

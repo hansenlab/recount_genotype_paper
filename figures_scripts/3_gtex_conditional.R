@@ -6,7 +6,7 @@ source("scripts/source.R")
 
 
 #Calculate GTEX conditional accuracies:
-GTEx_metadata = read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")
+GTEx_metadata = read.csv("GTEx_testing.csv")##file containing paths to genotype accuracy for GTEx test samples
 conditional_accuracies<-c()
 figure<-"ready_to_plot/GTEx_testing_conditional_acc.rds"
 if(!file.exists(figure)){

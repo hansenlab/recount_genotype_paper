@@ -1,11 +1,11 @@
 library(tidyverse)
 library(data.table)
-setwd("~/recount_genotype/redo_manuscript_figures")
+
 source("scripts/source.R")
 
 
 
-GTEx_metadata = read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")
+GTEx_metadata = read.csv("GTEx_testing.csv") #Path to GTex testing metadata
 major<-c()
 
 figure<-"ready_to_plot/major_model.rds"

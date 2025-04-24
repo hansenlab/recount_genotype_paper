@@ -5,23 +5,23 @@ library(cowplot)
 theme_set(theme_cowplot())
 theme1= theme(axis.text=element_text(size = 10), axis.title=element_text(size = 15))
 
-pca<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA.rds")
+pca<-readRDS("1000GenomePCA.rds") #PC loadings for 1k genome
 
-setwd("~/recount_genotype/redo_manuscript_figures/")
-plot_file = "~/recount_genotype/redo_manuscript_figures/ready_to_plot/gauvadis_PCA.rds"
+
+plot_file = "gauvadis_PCA.rds"
 
 if(!file.exists(plot_file)) {
   
-geu_met<-read.delim("~/recount_genotype/study_metadata/geuvadis/input/EMBL_geuvadis_metadata.txt")
+geu_met<-read.delim("EMBL_geuvadis_metadata.txt") #path to geuvadis metadata
 
-sra<-read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/all_SRA.csv")
+sra<-read.csv("all_SRA.csv") #Paths to SRA predicted genotype files
 sra<-sra %>% filter(study=="ERP001942", sample_id %in% geu_met$Comment.ENA_RUN.)
 
 #-------------------------------------------
 #Do PCA
 #load in the PCs and the locations
-pca_plot<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pca_plot_1KGenome.rds")
-location<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/1000GenomePCA_location.rds")
+pca_plot<-readRDS("pca_plot_1KGenome.rds") #PC loadings for 1k genome
+location<-readRDS("1000GenomePCA_location.rds")
 #Define a function to make the pca plot:
 
 pca_df<-function(df){
@@ -63,7 +63,7 @@ geu_plot<-data.frame(pc1=numeric(),pc2=numeric(), pop=character())
 for(i in 1:nrow(sra)){
   print(i)
   run<-sra$sample_id[i]
-  path<-paste0("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/output/ERP001942/predict_genotype_accuracy/",
+  path<-paste0($Path_to_dir,
                run, "_predGenotypes_final.csv.gz")
   one_samp<-read.csv(path)
   one_samp$sample_id_rep<-run
@@ -75,12 +75,12 @@ geuvadis_PCA<-rbind(pca_plot,geu_plot)
 geuvadis_PCA$Study<-"GEUVADIS"
 geuvadis_PCA$Study[1:2504]<-"1000Genome"
 
-saveRDS(geuvadis_PCA, "~/recount_genotype/redo_manuscript_figures/ready_to_plot/gauvadis_PCA.rds")
+saveRDS(geuvadis_PCA, "gauvadis_PCA.rds")
 }
 
 geuvadis_PCA<-readRDS(plot_file)
 varian<-as.numeric(summary(pca)$importance[2,1:10])
-pca_plot<-readRDS("/dcs04/hansen/data/recount_genotype/PCA/1kGenome_pIII/pca_plot/pca_plot_1KGenome.rds")
+pca_plot<-readRDS("pca_plot_1KGenome.rds")
 
 my_color<-c("#DD77E4","#962638","#FFA81A","#585CD4","#5ba965","gray57")
 #my_color<-c("tomato","yellow3","springgreen3","steelblue1","orchid2","gray57")
@@ -104,7 +104,7 @@ p2=ggplot(geuvadis_PCA[1:2504,])+
 
 
 figure5<-plot_grid(p1, p2,labels = "AUTO", ncol = 1)
-pdf(file="~/recount_genotype/redo_manuscript_figures/figure/figure5.pdf", width = 7, height = 4.5)
+pdf(file="figure5.pdf", width = 7, height = 4.5)
 print(figure5)
 dev.off()
 

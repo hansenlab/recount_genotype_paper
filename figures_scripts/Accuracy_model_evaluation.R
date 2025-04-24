@@ -4,17 +4,11 @@ library(rms) #restricted cubic splines
 library(cowplot)
 theme_set(theme_cowplot())
 
-setwd("~/recount_genotype/redo_manuscript_figures")
 
 plot_file = "ready_to_plot/Accuracy_model_evaluation.rds"
 
 if(!file.exists(plot_file)) {
-  GTEx_metadata = read.csv("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")
-  #Geuvadis_metadata = read.csv("/dcs04/hansen/data/recount_genotype/pipeline/AggregateFiles/Geuvadis_testing_metadata.csv")
-  #dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/output_model_eval/
-    # GTEx_metadata$accuracyModelEvaluation<-paste0("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/output_model_eval/",GTEx_metadata$tissue,"_accuracy_model_evaluation.rds" )
-    # GTEx_metadata$accuracyModelEvaluationError<-paste0("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/output_model_eval/",GTEx_metadata$tissue,"_accuracy_model_evaluation_err.rds" )
-    # fwrite(GTEx_metadata, "/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/AggregateFiles/GTEx_testing.csv")    
+  GTEx_metadata = read.csv("GTEx_testing.csv") ##file containing paths to genotype accuracies for GTEx test samples
      all_GTEx = list()
   for(i in 1:nrow(GTEx_metadata)) {
     print(i)
@@ -25,7 +19,7 @@ if(!file.exists(plot_file)) {
   all_GTEx = do.call(rbind, all_GTEx)
   all_GTEx$study = "GTEx Test"
   
-  geuvadis = fread("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/output_model_eval/geuvadis_accuracyModelEvaluation.csv.gz")
+  geuvadis = fread("geuvadis_accuracyModelEvaluation.csv.gz") ##file containing paths to genotype accuracies for geuvadis test samples
   geuvadis$tissue = "Geuvadis LCL"
   geuvadis$study = "Geuvadis OOS"
   GTEx_vs_Geuvadis = rbind(all_GTEx, geuvadis)

@@ -6,15 +6,15 @@ library(data.table)
 theme_set(theme_cowplot())
 theme1= theme(axis.text=element_text(size = 10), axis.title=element_text(size = 15))
 
-setwd("~/recount_genotype/redo_manuscript_figures")
+
 
 
 ####In this R session, I looked at SRA samples.
 ##I projected the SRA data onto 1000 Genome PCA that I have previously made in make_1kg_pca.R
-pca<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/1kGenome_pIII/pca_plot/1000GenomePCA.rds")
-sra_pca<-fread("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/sra_pca.csv.gz")
-location<-readRDS("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/1kGenome_pIII/pca_plot/1000GenomePCA_location.rds")
-recount3_metadata<-fread("/dcs07/hansen/data/recount_genotype/new_count_pipeline/new_count_pipeline/PCA/SRA/Recount3_metadata.tsv", header= T, sep = "\t",quote="")
+pca<-readRDS("1000GenomePCA.rds")
+sra_pca<-fread("sra_pca.csv.gz")
+location<-readRDS("1000GenomePCA_location.rds")
+recount3_metadata<-fread("Recount3_metadata.tsv", header= T, sep = "\t",quote="")
 #location<-30875
 varian<-round(as.numeric(summary(pca)$importance[2,1:10]),3)
 
@@ -36,13 +36,5 @@ ggplot(sra_pca[which(sra_pca$percent_zero <10),], aes(pc1,pc2))+ geom_point(alph
   coord_fixed(ratio = varian[2]/varian[1])+labs(x=paste0("PC1(", varian[1]*100, "%)"),y=paste0("PC2(", varian[2]*100, "%)"), color="Population")+theme1
 dev.off()
 
-# q=sra_pca[-c(1:2504),]
-# q$pop<-NA
-# q<-rbind(q,sra_pca[1:2504,])
-# 
-# pdf(file="figure/PCA_sra2.pdf", width = 9, height = 5)
-# ggplot(q[!is.na(q$missingness),])+ geom_point(aes(pc1,pc2,color=pop ),alpha=0.7, size= 0.6)+
-#   coord_fixed(ratio = varian[2]/varian[1])+ facet_grid(vars(missingness))+
-#   labs(x=paste0("PC1(", varian[1]*100, "%)"),y=paste0("PC2(", varian[2]*100, "%)"), color="Population")+theme1
-# dev.off()
+
 
